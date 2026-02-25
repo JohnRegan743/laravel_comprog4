@@ -1,0 +1,19 @@
+This is a placeholder for creating a sample Excel file.
+In a real scenario, you would create an Excel file with these columns:
+
+Required Columns:
+- item_code (unique identifier)
+- name (product name)
+- category (Product or Service)
+- unit (pcs, hour, month, etc.)
+- unit_price (decimal number)
+- description (optional)
+- brand (optional)
+- type (optional)
+- active (TRUE or FALSE)
+
+Sample Data:
+item_code,name,category,unit,unit_price,description,brand,type,active
+TEST001,Sample Product A,Product,pcs,299.99,Test description A,TestBrand,Electronics,TRUE
+TEST002,Sample Service A,Service,hour,75.00,Test service description A,ServicePro,Service,TRUE
+TEST003,Sample Product B,Product,pcs,199.99,Test description B,BrandB,Furniture,FALSE
