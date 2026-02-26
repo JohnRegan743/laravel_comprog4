@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductPhoto;
+use App\Models\TransactionItem;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductsImport;
+use Laravel\Scout\Builder as ScoutBuilder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class ProductController extends Controller
 {
@@ -76,8 +80,26 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('photos', 'reviews');
-        return view('products.show', compact('product'));
+        $product->load(['photos', 'reviews.user']);
+
+        $user = auth()->user();
+        $canReview = false;
+        $existingReview = null;
+
+        if ($user) {
+            $existingReview = $product->reviews()
+                ->where('user_id', $user->id)
+                ->first();
+
+            $canReview = TransactionItem::where('product_id', $product->id)
+                ->whereHas('transaction', function ($query) use ($user) {
+                    $query->where('user_id', $user->id)
+                        ->where('status', 'completed');
+                })
+                ->exists();
+        }
+
+        return view('products.show', compact('product', 'canReview', 'existingReview'));
     }
 
     public function edit(Product $product)
@@ -197,5 +219,77 @@ class ProductController extends Controller
 
         return redirect()->back()
             ->with('success', 'Primary image updated successfully.');
+    }
+
+    public function search(Request $request)
+    {
+        $search = $request->input('q');
+        $category = $request->input('category');
+        $brand = $request->input('brand');
+        $type = $request->input('type');
+        $priceMin = $request->input('price_min');
+        $priceMax = $request->input('price_max');
+
+        if ($search) {
+            $results = Product::search($search)->get();
+        } else {
+            $results = Product::where('active', true)->get();
+        }
+
+        $filtered = $results->filter(function (Product $product) use ($category, $brand, $type, $priceMin, $priceMax) {
+            if (!$product->active) {
+                return false;
+            }
+
+            if ($category && $product->category !== $category) {
+                return false;
+            }
+
+            if ($brand && (! $product->brand || stripos($product->brand, $brand) === false)) {
+                return false;
+            }
+
+            if ($type && (! $product->type || stripos($product->type, $type) === false)) {
+                return false;
+            }
+
+            if ($priceMin !== null && $product->unit_price < (float) $priceMin) {
+                return false;
+            }
+
+            if ($priceMax !== null && $product->unit_price > (float) $priceMax) {
+                return false;
+            }
+
+            return true;
+        })->values();
+
+        $page = Paginator::resolveCurrentPage('page');
+        $perPage = 12;
+
+        $items = $filtered->forPage($page, $perPage)->values();
+
+        $products = new LengthAwarePaginator(
+            $items,
+            $filtered->count(),
+            $perPage,
+            $page,
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
+
+        return view('products.search', [
+            'products' => $products,
+            'search' => $search,
+            'filters' => [
+                'category' => $category,
+                'brand' => $brand,
+                'type' => $type,
+                'price_min' => $priceMin,
+                'price_max' => $priceMax,
+            ],
+        ]);
     }
 }

@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <div class="card">
+            <div class="card fade-in">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4>User Management</h4>
                     <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">

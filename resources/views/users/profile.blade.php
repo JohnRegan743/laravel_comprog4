@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
+            <div class="card fade-in">
                 <div class="card-header">
                     <h4>My Profile</h4>
                 </div>
@@ -79,7 +79,7 @@
             </div>
 
             <!-- Account Statistics -->
-            <div class="card mt-4">
+            <div class="card mt-4 fade-in">
                 <div class="card-header">
                     <h5>Account Statistics</h5>
                 </div>

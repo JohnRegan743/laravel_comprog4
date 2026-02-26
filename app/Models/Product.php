@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, Searchable;
 
     protected $fillable = [
         'item_code',
@@ -69,5 +70,21 @@ class Product extends Model
     public function transactionItems()
     {
         return $this->hasMany(TransactionItem::class);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     */
+    public function toSearchableArray(): array
+    {
+        return [
+            'item_code' => $this->item_code,
+            'name' => $this->name,
+            'category' => $this->category,
+            'unit' => $this->unit,
+            'description' => $this->description,
+            'brand' => $this->brand,
+            'type' => $this->type,
+        ];
     }
 }

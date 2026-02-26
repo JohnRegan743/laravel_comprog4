@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('content')
 <!-- Hero Section -->
@@ -33,23 +33,32 @@
 <!-- Search and Filter Section -->
 <section class="py-4 bg-light">
   <div class="container">
-    <div class="row g-3">
+    <div class="row g-3 align-items-end">
       <div class="col-md-3">
+        <label class="form-label mb-1">Category</label>
         <select id="categoryFilter" class="form-select">
           <option value="">All Categories</option>
           <option value="Product">Products</option>
           <option value="Service">Services</option>
         </select>
       </div>
-      <div class="col-md-6">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search products...">
+      <div class="col-md-4">
+        <label class="form-label mb-1">Quick Search</label>
+        <input type="text" id="searchInput" class="form-control" placeholder="Search products on this page...">
       </div>
       <div class="col-md-3">
+        <label class="form-label mb-1">Sort</label>
         <select id="sortFilter" class="form-select">
           <option value="name">Sort by Name</option>
           <option value="price-low">Price: Low to High</option>
           <option value="price-high">Price: High to Low</option>
         </select>
+      </div>
+      <div class="col-md-2 text-md-end">
+        <label class="form-label mb-1 d-block">Advanced</label>
+        <a href="{{ route('products.search') }}" class="btn btn-outline-dark w-100">
+          <i class="fas fa-search"></i> Advanced Search
+        </a>
       </div>
     </div>
   </div>

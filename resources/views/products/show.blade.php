@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card">
+            <div class="card fade-in">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4>Product Details</h4>
                     <div>
@@ -162,6 +162,21 @@
                     <hr>
 
                     <h5>Customer Reviews</h5>
+
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
                     @if($product->reviews->count() > 0)
                         <div class="row">
                             @foreach($product->reviews as $review)
@@ -189,6 +204,53 @@
                     @else
                         <p class="text-muted">No reviews yet.</p>
                     @endif
+
+                    <hr>
+
+                    @auth
+                        @if($canReview)
+                            <h5 class="mt-3">{{ $existingReview ? 'Update Your Review' : 'Write a Review' }}</h5>
+                            <form action="{{ route('products.reviews.store', $product) }}" method="POST" class="mt-2">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="rating" class="form-label">Rating <span class="text-danger">*</span></label>
+                                    <select name="rating" id="rating" class="form-select @error('rating') is-invalid @enderror" required>
+                                        <option value="">Select rating</option>
+                                        @for($i = 5; $i >= 1; $i--)
+                                            <option value="{{ $i }}" {{ old('rating', optional($existingReview)->rating) == $i ? 'selected' : '' }}>
+                                                {{ $i }} Star{{ $i > 1 ? 's' : '' }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('rating')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">Your Review <span class="text-danger">*</span></label>
+                                    <textarea name="comment" id="comment" rows="3" class="form-control @error('comment') is-invalid @enderror" required>{{ old('comment', optional($existingReview)->comment) }}</textarea>
+                                    @error('comment')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Please keep your review professional. Inappropriate words will be masked automatically.</div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    {{ $existingReview ? 'Update Review' : 'Submit Review' }}
+                                </button>
+                            </form>
+                        @else
+                            <p class="text-muted mt-3">
+                                You can review this item after completing a purchase.
+                            </p>
+                        @endif
+                    @else
+                        <p class="text-muted mt-3">
+                            Please <a href="{{ route('login') }}">login</a> to write a review.
+                        </p>
+                    @endauth
                 </div>
             </div>
         </div>
